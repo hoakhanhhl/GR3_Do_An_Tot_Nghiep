@@ -4,7 +4,7 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <Preferences.h>
-#include <WebServer.h> 
+#include <WebServer.h>  
 
 
 //----------------------------------------------------------------
@@ -43,9 +43,11 @@
 #endif
 
 // Thông tin kết nối MQTT  Mosquitto
-const char* mqttServer = "192.168.42.105";
+const char* mqttServer = "sinno.soict.ai";
 const int mqttPort = 1883;
 const char* mqttTopic = "dulieu";
+const char* mqttUser = "hoaltk";
+const char* mqttPassword = "123456";
 
 // Đối tượng MQTT
 WiFiClient espClient;
@@ -92,7 +94,7 @@ void setup() {
   // Kết nối MQTT
   client.setServer(mqttServer, mqttPort);
   while (!client.connected()) {
-    if (client.connect("ESP32Client")) {
+    if (client.connect("ESP32Client", mqttUser, mqttPassword)) {
       Serial.println("Connected to MQTT Broker");
     } else {
       Serial.println("Failed to connect to MQTT Broker, retrying...");

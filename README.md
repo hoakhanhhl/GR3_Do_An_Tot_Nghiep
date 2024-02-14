@@ -34,3 +34,41 @@ Xử lý và phân tích dữ liệu: Web server xử lý và phân tích dữ l
 
 Hiển thị dữ liệu: Kết quả phân tích và thông tin từ dữ liệu MQTT, cùng với mã định danh bệnh nhân, có thể được hiển thị trên giao diện web. Bạn có thể xác định bệnh nhân dựa trên mã định danh và hiển thị thông tin tương ứng với từng bệnh nhân trên giao diện web.
 
+## MQTT Broker
+
+MQTT Broker được cài đặt bằng docker hub tại URL <https://hub.docker.com/_/eclipse-mosquitto> với thông số cấu hình Docker Compose là
+
+```docker
+  mqtt:
+    image: "eclipse-mosquitto"
+    restart: always
+    volumes:
+      - "/home/mosquitto_dummy/config:/mosquitto/config"
+      - "/home/mosquitto_dummy/data:/mosquitto/data"
+    ports:
+      - "1883:1883"
+    networks:
+      official:
+        ipv4_address: 192.168.51.7    
+```
+
+Ngoài ra, cần cấu hình thêm MQTT Broker ở file **/mosquitto/config/mosquitto.conf** để cho phép:
+
+- Cho phép đón nhận kết nối MQTT Client từ internet
+
+```text
+listener 1883 0.0.0.0
+```
+
+- Cho phép truy cập với các account nằm trong file danh sách
+
+```text
+per_listener_settings true
+password_file /mosquitto/config/password.txt
+```
+
+>> Kiểm tra MQTT Broker bằng công cụ MQTT-Explorer
+![Verified by MQTT-Explorer](images/ConnectMQTTBroker.png)
+
+>> Xác nhân dữ liệu truyền về từ IoT
+![alt text](images/ViewMQTTData.png)
