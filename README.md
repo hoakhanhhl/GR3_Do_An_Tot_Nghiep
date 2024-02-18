@@ -67,8 +67,36 @@ per_listener_settings true
 password_file /mosquitto/config/password.txt
 ```
 
->> Kiểm tra MQTT Broker bằng công cụ MQTT-Explorer
+**Kiểm tra MQTT Broker bằng công cụ MQTT-Explorer**
+
+Kết nối với MQTT Broker \
 ![Verified by MQTT-Explorer](images/ConnectMQTTBroker.png)
 
->> Xác nhân dữ liệu truyền về từ IoT
+Xác nhân dữ liệu truyền về từ IoT \
 ![alt text](images/ViewMQTTData.png)
+
+## Cảm biến gia tốc
+
+>Lưu ý: người bán hàng thường không phân biệt được giữa cảm biến 9dof GY-9250 và 6dof GY6500, vì chúng có cùng dạng board. Khó để mua chính xác.
+
+- Với loại MPU-9250 `9 trục`, gợi ý sử dụng thư viện <https://github.com/hideakitai/MPU9250>
+- Với loại MPU-6500 `6 trục`, gợi ý sử dụng thư viện <https://github.com/Tockn/MPU6050_tockn>
+
+Dưới đây là ảnh chụp thực tế để so sánh 4 loại cảm biến. Chỉ duy nhất 1 cảm biến ở trên là MPU9250, 3 cảm biến bên dưới đều là 6500.
+![4 loại cảm biến gia tốc](images/4types.png)
+
+### Phân biệt MPU6000, MPU6050, MPU6500
+
+|MPU6050 |MPU6000 | MPU6500|
+|--|--|--|
+| cùng thông số đo | |
+|8k mẫu|8k mẫu|32k mẫu|
+|I2C|I2C,SPI|I2C,SPI|
+- Cùng giá trị, cùng phần cứng đo thông số với 8k mẫu.
+
+### Phân biệt MP9150 và MPU9250
+
+|MPU9150 | MPU9250|
+|--|--|
+|MPU6050 | MPU6500 |
+|AK8975 magnetometer | AK8963 magnetometer |
