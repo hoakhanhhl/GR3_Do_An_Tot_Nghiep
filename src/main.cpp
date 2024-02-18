@@ -14,6 +14,9 @@
 /// Sử dụng thư viện SOICT_CORE_BOARD để có tính năng cấu hình và ghi nhớ cấu hình mạng WiFi
 #define ENABLE_SIOT_WIFI
 
+/// Sử dụng MQTT
+//#define ENABLE_MQTT
+
 //----------------------------------------------------------------
 // Led mặc định có sẵn trên board ở GPIO 22
 #define LED_BUILTIN 22
@@ -42,16 +45,21 @@
     }
 #endif
 
-// Thông tin kết nối MQTT  Mosquitto
-const char* mqttServer = "sinno.soict.ai";
-const int mqttPort = 1883;
-const char* mqttTopic = "dulieu";
-const char* mqttUser = "hoaltk";
-const char* mqttPassword = "123456";
+#if defined(ENABLE_MQTT)
+  // Thông tin kết nối MQTT  Mosquitto
+  // PROGMEM để hằng kí tự nằm trong bộ nhớ chương trình flash, thay vì bộ nhớ dữ liệu ram
+  const PROGMEM char* mqttServer = "sinno.soict.ai";
+  const int mqttPort = 1883;
+  const PROGMEM char* mqttTopic = "dulieu";
+  const PROGMEM char* mqttUser = "hoaltk";
+  const PROGMEM char* mqttPassword = "123456";
+#endif
 
-// Đối tượng MQTT
-WiFiClient espClient;
-PubSubClient client(espClient);
+#if defined (ENABLE_MQTT)
+  // Đối tượng MQTT
+  WiFiClient espClient;
+  PubSubClient client(espClient);
+#endif
 
 // Đối tượng cảm biến MPU9250
 MPU9250 mpu;
@@ -59,16 +67,8 @@ MPU9250 mpu;
 // Đối tượng Preferences
 Preferences preferences;
 
-// void setup_wifi() {
-//   //just for debug
-//   Serial.begin(115200);
-//   // Make sure WiFi ssid/password is correct. Otherwise, raise the Adhoc AP Station with ssid = SOICT_CORE_BOARD and password =  12345678
-//   MyWiFi->setup();
-//   // Release the memory allocated for WiFi Station Handler after finishing his work
-//   delete  MyWiFi;
-//   MyWiFi = _NULL;
-//   // TODO something
-// }
+// Mã định danh thiết bị
+String deviceID;
 
 void setup() {
   Serial.begin(115200);
@@ -91,6 +91,7 @@ void setup() {
   //   nhập định danh qua usb
   // }}
 
+#if defined(ENABLE_MQTT)
   // Kết nối MQTT
   client.setServer(mqttServer, mqttPort);
   while (!client.connected()) {
@@ -101,9 +102,10 @@ void setup() {
       delay(2000);
     }
   }
+#endif
 
   // Lấy địa chỉ MAC của ESP32 làm mã định danh
-  String deviceID = WiFi.macAddress();
+  deviceID = WiFi.macAddress();
 
   // Khởi tạo Preferences
   preferences.begin("myApp", false);
