@@ -63,6 +63,8 @@
 
 // Đối tượng cảm biến MPU9250
 MPU9250 mpu;
+#define MPU9250_SDA_PIN 19  
+#define MPU9250_SCL_PIN 23
 
 // Đối tượng Preferences
 Preferences preferences;
@@ -83,9 +85,15 @@ void setup() {
   setup_wifi();
 #endif  
 
-  Wire.begin();  // Khởi tạo giao tiếp I2C
-  delay(2000);
-  mpu.setup(0x68);  // Cấu hình MPU9250 với địa chỉ I2C là 0x68
+  Wire.begin(MPU9250_SDA_PIN, MPU9250_SCL_PIN);  // Ánh xạ chân Pin của CPU với các chân I2C của MPU 
+  delay(2000);  
+  if (!mpu.setup(0x68)) {  // change to your own address
+      while (1) {
+          Serial.println("MPU connection failed. Please check your connection with `connection_check` example.");
+          delay(5000);
+      }
+  }
+
 
   // while check (button =1) in 2 giay {{
   //   nhập định danh qua usb
@@ -118,29 +126,38 @@ void loop() {
   // Serial.println(MyWiFi->GetDeviceID());
   // Serial.printf("  %s / %s \n", MyWiFi->GetSSID(), MyWiFi->GetPassword());
   // delay(1000);
-  // Đọc dữ liệu từ cảm biến
-  mpu.update();
-  // Lấy giá trị gia tốc, góc quay và cảm biến từ trường theo x,y,z
-  float accx = mpu.getAccX();
-  float accy = mpu.getAccY();
-  float accz = mpu.getAccZ();
-  float gyrox = mpu.getGyroX();
-  float gyroy = mpu.getGyroY();
-  float gyroz = mpu.getGyroZ();
-  float magx = mpu.getMagX();
-  float magy = mpu.getMagY();
-  float magz = mpu.getMagZ();
- 
+#pragma region MPU_READER  
+  // Đọc dữ liệu từ cảm biến MPU. Khoảng trễ giữa 2 lần đọc liên tiếp phải >= 25ms
+  if (mpu.update()) {
+      static uint32_t prev_ms = millis();   
+      if (millis() > prev_ms + 25) { 
+        // Lấy giá trị gia tốc, góc quay và cảm biến từ trường theo x,y,z
+        float accx = mpu.getAccX();
+        float accy = mpu.getAccY();
+        float accz = mpu.getAccZ();
+        float gyrox = mpu.getGyroX();
+        float gyroy = mpu.getGyroY();
+        float gyroz = mpu.getGyroZ();
+        float magx = mpu.getMagX();
+        float magy = mpu.getMagY();
+        float magz = mpu.getMagZ();
 
-  // Gửi dữ liệu lên MQTT
-  String payload = preferences.getString("deviceID", "") + ","
-                   + String(accx) + "," + String(accy) + "," + String(accz) + ","
-                   + String(gyrox) + "," + String(gyroy) + "," + String(gyroz) + ","
-                   + String(magx) + "," + String(magy) + "," + String(magz);
+        // Gửi dữ liệu lên MQTT
+        String payload = deviceID + ","
+                      + String(accx) + "," + String(accy) + "," + String(accz) + ","
+                      + String(gyrox) + "," + String(gyroy) + "," + String(gyroz) + ","
+                      + String(magx) + "," + String(magy) + "," + String(magz);
 
-  client.publish(mqttTopic, payload.c_str());
+        #if defined(ENABLE_MQTT)
+          client.publish(mqttTopic, payload.c_str());
+        #endif
+        Serial.println(payload);
+        prev_ms = millis();
 
-  Serial.println("Data sent to MQTT");
-  // Đợi 1 giây trước khi gửi dữ liệu tiếp theo
-  delay(5000);
+        // Đợi 1 giây trước khi gửi dữ liệu tiếp theo
+        delay(1000);
+      }           
+  }
+#pragma endregion MPU_READER
+  
 };
