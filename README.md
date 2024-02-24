@@ -34,3 +34,69 @@ Xử lý và phân tích dữ liệu: Web server xử lý và phân tích dữ l
 
 Hiển thị dữ liệu: Kết quả phân tích và thông tin từ dữ liệu MQTT, cùng với mã định danh bệnh nhân, có thể được hiển thị trên giao diện web. Bạn có thể xác định bệnh nhân dựa trên mã định danh và hiển thị thông tin tương ứng với từng bệnh nhân trên giao diện web.
 
+## MQTT Broker
+
+MQTT Broker được cài đặt bằng docker hub tại URL <https://hub.docker.com/_/eclipse-mosquitto> với thông số cấu hình Docker Compose là
+
+```docker
+  mqtt:
+    image: "eclipse-mosquitto"
+    restart: always
+    volumes:
+      - "/home/mosquitto_dummy/config:/mosquitto/config"
+      - "/home/mosquitto_dummy/data:/mosquitto/data"
+    ports:
+      - "1883:1883"
+    networks:
+      official:
+        ipv4_address: 192.168.51.7    
+```
+
+Ngoài ra, cần cấu hình thêm MQTT Broker ở file **/mosquitto/config/mosquitto.conf** để cho phép:
+
+- Cho phép đón nhận kết nối MQTT Client từ internet
+
+```text
+listener 1883 0.0.0.0
+```
+
+- Cho phép truy cập với các account nằm trong file danh sách
+
+```text
+per_listener_settings true
+password_file /mosquitto/config/password.txt
+```
+
+**Kiểm tra MQTT Broker bằng công cụ MQTT-Explorer**
+
+Kết nối với MQTT Broker \
+![Verified by MQTT-Explorer](images/ConnectMQTTBroker.png)
+
+Xác nhân dữ liệu truyền về từ IoT \
+![alt text](images/ViewMQTTData.png)
+
+## Cảm biến gia tốc
+
+>Lưu ý: người bán hàng thường không phân biệt được giữa cảm biến 9dof GY-9250 và 6dof GY6500, vì chúng có cùng dạng board. Khó để mua chính xác.
+
+- Với loại MPU-9250 `9 trục`, gợi ý sử dụng thư viện <https://github.com/hideakitai/MPU9250>
+- Với loại MPU-6500 `6 trục`, gợi ý sử dụng thư viện <https://github.com/Tockn/MPU6050_tockn>
+
+Dưới đây là ảnh chụp thực tế để so sánh 4 loại cảm biến. Chỉ duy nhất 1 cảm biến ở trên là MPU9250, 3 cảm biến bên dưới đều là 6500.
+![4 loại cảm biến gia tốc](images/4types.png)
+
+### Phân biệt MPU6000, MPU6050, MPU6500
+
+|MPU6050 |MPU6000 | MPU6500|
+|--|--|--|
+| cùng thông số đo | |
+|8k mẫu|8k mẫu|32k mẫu|
+|I2C|I2C,SPI|I2C,SPI|
+- Cùng giá trị, cùng phần cứng đo thông số với 8k mẫu.
+
+### Phân biệt MP9150 và MPU9250
+
+|MPU9150 | MPU9250|
+|--|--|
+|MPU6050 | MPU6500 |
+|AK8975 magnetometer | AK8963 magnetometer |
