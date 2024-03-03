@@ -1,0 +1,14 @@
+  mqtt:
+    # docker pull
+    image: "eclipse-mosquitto"    
+    # Neu server toi, docker toi, thi khi nao doker chay lai se tu dong chay lai cai nay
+    restart: always
+    # anh xathu muc trong docker voi may vat ly ==> de khi xoa docker thi du lieu van con.
+    volumes:
+      - "C:/Users/Admin1/Documents/PlatformIO/Projects/Do_An_Tot_Nghiep/DockerFolder/mosquitto/config:/mosquitto/config"
+      - "C:/Users/Admin1/Documents/PlatformIO/Projects/Do_An_Tot_Nghiep/DockerFolder/mosquitto/data:/mosquitto/data"
+    ports:
+      - "1883:1883"
+    networks:
+      official:
+        ipv4_address: 192.168.51.7    

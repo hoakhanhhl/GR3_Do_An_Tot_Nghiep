@@ -1,11 +1,10 @@
 #include <Arduino.h>        //Phải khai báo thêm nếu sử dụng Visual Studio Code + PlatformIO
 #include <Wire.h>
-#include <MPU9250.h>
+#include <MPU6050_tockn.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <Preferences.h>
 #include <WebServer.h>  
-
 
 //----------------------------------------------------------------
 // CẤU HÌNH 
@@ -15,7 +14,7 @@
 #define ENABLE_SIOT_WIFI
 
 /// Sử dụng MQTT
-//#define ENABLE_MQTT
+#define ENABLE_MQTT
 
 //----------------------------------------------------------------
 // Led mặc định có sẵn trên board ở GPIO 22
@@ -48,7 +47,7 @@
 #if defined(ENABLE_MQTT)
   // Thông tin kết nối MQTT  Mosquitto
   // PROGMEM để hằng kí tự nằm trong bộ nhớ chương trình flash, thay vì bộ nhớ dữ liệu ram
-  const PROGMEM char* mqttServer = "sinno.soict.ai";
+  const char* mqttServer = "192.168.42.105";
   const int mqttPort = 1883;
   const PROGMEM char* mqttTopic = "dulieu";
   const PROGMEM char* mqttUser = "hoaltk";
@@ -61,11 +60,11 @@
   PubSubClient client(espClient);
 #endif
 
-// Đối tượng cảm biến MPU9250
-MPU9250 mpu;
-#define MPU9250_SDA_PIN 19  
-#define MPU9250_SCL_PIN 23
-
+// Đối tượng cảm biến MPU6050
+MPU6050 mpu6050(Wire);
+#define MPU6050_SDA_PIN 19  
+#define MPU6050_SCL_PIN 23
+long timer = 1000;
 // Đối tượng Preferences
 Preferences preferences;
 
@@ -85,25 +84,18 @@ void setup() {
   setup_wifi();
 #endif  
 
-  Wire.begin(MPU9250_SDA_PIN, MPU9250_SCL_PIN);  // Ánh xạ chân Pin của CPU với các chân I2C của MPU 
-  delay(2000);  
-  if (!mpu.setup(0x68)) {  // change to your own address
-      while (1) {
-          Serial.println("MPU connection failed. Please check your connection with `connection_check` example.");
-          delay(5000);
-      }
-  }
-
-
-  // while check (button =1) in 2 giay {{
-  //   nhập định danh qua usb
-  // }}
+  Wire.begin(MPU6050_SDA_PIN, MPU6050_SCL_PIN);  // Ánh xạ chân Pin của CPU với các chân I2C của MPU 
+  delay(2000); 
+  // Khởi động cảm biến MPU6050
+  mpu6050.begin();
+  // Tính toán và hiệu chuẩn giá trị offset của con quay quanh các trục (gyroscope)
+  mpu6050.calcGyroOffsets(true);
 
 #if defined(ENABLE_MQTT)
   // Kết nối MQTT
   client.setServer(mqttServer, mqttPort);
   while (!client.connected()) {
-    if (client.connect("ESP32Client", mqttUser, mqttPassword)) {
+    if (client.connect("ESP32Client")) {
       Serial.println("Connected to MQTT Broker");
     } else {
       Serial.println("Failed to connect to MQTT Broker, retrying...");
@@ -123,41 +115,36 @@ void setup() {
 }
 
 void loop() {
-  // Serial.println(MyWiFi->GetDeviceID());
-  // Serial.printf("  %s / %s \n", MyWiFi->GetSSID(), MyWiFi->GetPassword());
-  // delay(1000);
-#pragma region MPU_READER  
-  // Đọc dữ liệu từ cảm biến MPU. Khoảng trễ giữa 2 lần đọc liên tiếp phải >= 25ms
-  if (mpu.update()) {
-      static uint32_t prev_ms = millis();   
-      if (millis() > prev_ms + 25) { 
+
+#pragma region MPU6050_READER  
+  mpu6050.update();
+  if(millis() - timer > 1000){
         // Lấy giá trị gia tốc, góc quay và cảm biến từ trường theo x,y,z
-        float accx = mpu.getAccX();
-        float accy = mpu.getAccY();
-        float accz = mpu.getAccZ();
-        float gyrox = mpu.getGyroX();
-        float gyroy = mpu.getGyroY();
-        float gyroz = mpu.getGyroZ();
-        float magx = mpu.getMagX();
-        float magy = mpu.getMagY();
-        float magz = mpu.getMagZ();
+        float accx = mpu6050.getAccX();
+        float accy = mpu6050.getAccY();
+        float accz = mpu6050.getAccZ();
+        float gyrox = mpu6050.getGyroX();
+        float gyroy = mpu6050.getGyroY();
+        float gyroz = mpu6050.getGyroZ();
+        float angx = mpu6050.getGyroAngleX();
+        float angy = mpu6050.getGyroAngleY();
+        float angz = mpu6050.getGyroAngleZ();
 
         // Gửi dữ liệu lên MQTT
         String payload = deviceID + ","
                       + String(accx) + "," + String(accy) + "," + String(accz) + ","
                       + String(gyrox) + "," + String(gyroy) + "," + String(gyroz) + ","
-                      + String(magx) + "," + String(magy) + "," + String(magz);
+                      + String(angx) + "," + String(angy) + "," + String(angz);
 
         #if defined(ENABLE_MQTT)
           client.publish(mqttTopic, payload.c_str());
         #endif
         Serial.println(payload);
-        prev_ms = millis();
-
+        timer = millis();
         // Đợi 1 giây trước khi gửi dữ liệu tiếp theo
         delay(1000);
       }           
-  }
-#pragma endregion MPU_READER
+
+#pragma endregion MPU6050_READER
   
 };
