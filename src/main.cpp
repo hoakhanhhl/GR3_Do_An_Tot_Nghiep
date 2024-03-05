@@ -47,7 +47,8 @@
 #if defined(ENABLE_MQTT)
   // Thông tin kết nối MQTT  Mosquitto
   // PROGMEM để hằng kí tự nằm trong bộ nhớ chương trình flash, thay vì bộ nhớ dữ liệu ram
-  const char* mqttServer = "192.168.42.105";
+
+  const char* mqttServer = "sinno.soict.ai";
   const int mqttPort = 1883;
   const PROGMEM char* mqttTopic = "dulieu";
   const PROGMEM char* mqttUser = "hoaltk";
@@ -96,13 +97,11 @@ void setup() {
 #if defined(ENABLE_MQTT)
   // Kết nối MQTT
   client.setServer(mqttServer, mqttPort);
-  while (!client.connected()) {
-    if (client.connect("mqttServer, mqttUser, mqttPassword")) {
+   if (!client.connect(mqttServer, mqttUser, mqttPassword)) {
+    Serial.print("MQTT connection failed! Error code = ");
+  } else {
       Serial.println("Connected to MQTT Broker");
-    } else {
-      Serial.println("MQTT connection failed! Error code = ");
       delay(2000);
-    }
   }
   Serial.println("You're connected to the MQTT broker!");
   Serial.println();
