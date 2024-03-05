@@ -1,4 +1,4 @@
-#include <Arduino.h>        //Phải khai báo thêm nếu sử dụng Visual Studio Code + PlatformIO
+#include <Arduino.h>        //Phải khai báo thêm nếu sử dụng Visual Studio Code + PlatformIO  á
 #include <Wire.h>
 #include <MPU6050_tockn.h>
 #include <WiFi.h>
@@ -62,8 +62,10 @@
 
 // Đối tượng cảm biến MPU6050
 MPU6050 mpu6050(Wire);
+
 #define MPU6050_SDA_PIN 19  
-#define MPU6050_SCL_PIN 23
+#define MPU6050_SCL_PIN 22
+
 long timer = 1000;
 // Đối tượng Preferences
 Preferences preferences;
@@ -81,7 +83,7 @@ void setup() {
   delete  MyWiFi;
   MyWiFi = _NULL;
 #else
-  setup_wifi();
+  //setup_wifi();
 #endif  
 
   Wire.begin(MPU6050_SDA_PIN, MPU6050_SCL_PIN);  // Ánh xạ chân Pin của CPU với các chân I2C của MPU 
@@ -95,13 +97,15 @@ void setup() {
   // Kết nối MQTT
   client.setServer(mqttServer, mqttPort);
   while (!client.connected()) {
-    if (client.connect("ESP32Client")) {
+    if (client.connect("mqttServer, mqttUser, mqttPassword")) {
       Serial.println("Connected to MQTT Broker");
     } else {
-      Serial.println("Failed to connect to MQTT Broker, retrying...");
+      Serial.println("MQTT connection failed! Error code = ");
       delay(2000);
     }
   }
+  Serial.println("You're connected to the MQTT broker!");
+  Serial.println();
 #endif
 
   // Lấy địa chỉ MAC của ESP32 làm mã định danh
