@@ -53,10 +53,10 @@ html {
             document.getElementById("did").innerHTML = fields[2];
         })
     }
-    function SetDeviceID() {
-      let DeviceID = prompt("Please enter new Device ID:", "");
-      if (DeviceID == null)  return;
-      fetch('/cgi/save?d=' + DeviceID)
+    function SetPatientID() {
+      let PatientID = prompt("Please enter new Patient ID:", "");
+      if (PatientID == null)  return;
+      fetch('/cgi/save?d=' + PatientID)
       .then(res => res.text())
       .then(text => {
         window.alert(text);
@@ -83,13 +83,13 @@ html {
 	<div>Current WiFi SSID:
         <span style="color: green; font-weight: bold;" id="ssid"></span>
     </div>       
-    <div>Device ID:
+    <div>Patient ID:
         <span style="color: purple; font-weight: bold;" id="did"></span>
     </div> 
 </div>
 <div>
 <button class="button button1" onclick="window.location.href='/enroll';">WiFiScan</button>
-<button class="button button2" onclick="SetDeviceID()">DeviceID</button>
+<button class="button button2" onclick="SetPatientID()">PatientID</button>
 <button class="button button2" onclick="PureSettings()">Pure settings</button>
 <button class="button button2" onclick="window.location.href='/restart';">Restart</button>
 </div>

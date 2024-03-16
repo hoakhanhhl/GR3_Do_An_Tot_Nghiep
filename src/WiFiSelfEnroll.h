@@ -16,8 +16,8 @@ class WiFiSelfEnroll{
         static char myssid[32];
         static String password;
         static char mypassword[20];
-        static String deviceid;
-        static char mydeviceid[30];
+        static String patientid;
+        static char mypatientid[30];
         static Preferences preferences;
         static WiFiClient wificlient;
 #if defined(ARDUINO_ARCH_ESP32)        
@@ -42,7 +42,7 @@ class WiFiSelfEnroll{
         void setup(const char * adhoc_ssid, const char * adhoc_password);    
         char * GetSSID();
         char * GetPassword();
-        char * GetDeviceID();
+        char * GetPatientID();
         bool IsConfigOK();
 };
 #endif

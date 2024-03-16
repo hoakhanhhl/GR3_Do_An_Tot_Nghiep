@@ -8,7 +8,7 @@
 #define FLASH_NAMESPACE "WiFiSelfEnroll"
 #define FLASH_NAMESPACE_KEY_SSID "ssid"
 #define FLASH_NAMESPACE_KEY_PASSWORD "pass"
-#define FLASH_NAMESPACE_KEY_DEVICEID "id"
+#define FLASH_NAMESPACE_KEY_PATIENTID "id"
 
 /// @brief the default wifi SSID
 #define SOICT_WIFI_SSID "SOICT_CORE_BOARD"
@@ -36,9 +36,9 @@ char WiFiSelfEnroll::myssid[32];
 /// @brief  the current password. A pointer to parambuf
 String WiFiSelfEnroll::password;
 char WiFiSelfEnroll::mypassword[20];
-/// @brief  the current deviceid. A pointer to parambuf
-String WiFiSelfEnroll::deviceid;
-char WiFiSelfEnroll::mydeviceid[30];
+/// @brief  the current patientid. A pointer to parambuf
+String WiFiSelfEnroll::patientid;
+char WiFiSelfEnroll::mypatientid[30];
 #if defined(ARDUINO_ARCH_ESP32)        
     /// @brief  adhoc webserver to configure the new wifi network
     WebServer WiFiSelfEnroll::server(80);
@@ -126,11 +126,11 @@ void WiFiSelfEnroll::_APISave()  {
         #endif        
     }    
 
-    /// Save DeviceID
+    /// Save PatientID
     myArg="d";
     if (server.hasArg(myArg)) {
-        deviceid = server.arg(myArg);
-        preferences.putString(FLASH_NAMESPACE_KEY_DEVICEID, deviceid);
+        patientid = server.arg(myArg);
+        preferences.putString(FLASH_NAMESPACE_KEY_PATIENTID, patientid);
         #ifdef _DEBUG_             
         Serial.println(server.arg(myArg));
         #endif        
@@ -151,11 +151,11 @@ void WiFiSelfEnroll::_APISave()  {
 }
 
 /*-------------------------------------------------------------------------*/
-/// @brief WebAPI: reponse the wifi configuration and device id
+/// @brief WebAPI: reponse the wifi configuration and patient id
 /// @details exntrypoint http://192.168.15.1/cgi/save?n=ssid&p=password
 void WiFiSelfEnroll::_APISettings()  {
     char buf[50];
-    (ssid + "," + password + ',' + deviceid).toCharArray(buf,50);
+    (ssid + "," + password + ',' + patientid).toCharArray(buf,50);
 #ifdef _DEBUG_       
     Serial.print("WiFiSelf: /cgi/settings - ");
     Serial.println(buf);
@@ -165,7 +165,7 @@ void WiFiSelfEnroll::_APISettings()  {
 }
 
 /*-------------------------------------------------------------------------*/
-/// @brief Read the ssid / deviceid into flash memory
+/// @brief Read the ssid / patientid into flash memory
 /// @return e.g. '812A,12345678'
 void WiFiSelfEnroll::ReadWiFiConfig()  {
     byte len;
@@ -184,14 +184,14 @@ void WiFiSelfEnroll::ReadWiFiConfig()  {
     } else {
         password = "";
     }
-    if (preferences.isKey(FLASH_NAMESPACE_KEY_DEVICEID)) {
-        deviceid = preferences.getString(FLASH_NAMESPACE_KEY_DEVICEID);
+    if (preferences.isKey(FLASH_NAMESPACE_KEY_PATIENTID)) {
+        patientid = preferences.getString(FLASH_NAMESPACE_KEY_PATIENTID);
     } else {
-        deviceid = "";
+        patientid = "";
     }
     preferences.end();
 #ifdef _DEBUG_       
-    Serial.printf("In Flash: %s / %s , %s\n", ssid, password, deviceid);
+    Serial.printf("In Flash: %s / %s , %s\n", ssid, password, patientid);
 #endif
     return;
 }        
@@ -306,9 +306,9 @@ char * WiFiSelfEnroll::GetPassword()  {
     return mypassword;
 }
 
-char * WiFiSelfEnroll::GetDeviceID()  { 
-    deviceid.toCharArray(mydeviceid, 30);
-    return mydeviceid;
+char * WiFiSelfEnroll::GetPatientID()  { 
+    patientid.toCharArray(mypatientid, 30);
+    return mypatientid;
 }
 
 bool WiFiSelfEnroll::IsConfigOK(){
