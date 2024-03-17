@@ -32,8 +32,8 @@
   const char* mqttServer = "sinno.soict.ai";
   const int mqttPort = 1883;
   const PROGMEM char* mqttTopic = "dulieu";
-  const PROGMEM char* mqttUser = "hoaltk";
-  const PROGMEM char* mqttPassword = "123456";
+  const PROGMEM char* mqttUser = "student";
+  const PROGMEM char* mqttPassword = "sinhvien";
 #endif
 
 #if defined (ENABLE_MQTT)
