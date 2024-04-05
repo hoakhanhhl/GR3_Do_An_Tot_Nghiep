@@ -25,7 +25,7 @@
 
 #if defined(ARDUINO_ARCH_ESP32)
     /// @brief Press BOOT Button whenever restart to force device into Adhoc Station mode
-    #define BOOT_BUTTON GPIO_NUM_9
+    #define BOOT_BUTTON GPIO_NUM_32
 #elif defined(ARDUINO_ARCH_ESP8266)
     #define BOOT_BUTTON 0   // GPIO 0  là nút bấm Flash với nội trở kéo lên
 #endif    
