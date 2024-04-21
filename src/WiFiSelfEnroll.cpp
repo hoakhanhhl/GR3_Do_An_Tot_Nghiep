@@ -25,7 +25,8 @@
 
 #if defined(ARDUINO_ARCH_ESP32)
     /// @brief Press BOOT Button whenever restart to force device into Adhoc Station mode
-    #define BOOT_BUTTON GPIO_NUM_32
+    // #define BOOT_BUTTON GPIO_NUM_32
+    #define BOOT_BUTTON 32
 #elif defined(ARDUINO_ARCH_ESP8266)
     #define BOOT_BUTTON 0   // GPIO 0  là nút bấm Flash với nội trở kéo lên
 #endif    
@@ -385,7 +386,7 @@ void WiFiSelfEnroll::setup(const char * adhoc_ssid, const char * adhoc_password)
 #ifdef _DEBUG_    
     Serial.println("Check boot button..");
 #endif    
-    delay(1000);    
+    delay(3000);    
     /// Turn to Adhoc station mode if the Boot button pressed or cannot connect to the AP
     if (digitalRead(BOOT_BUTTON) == LOW || !IsConfigOK()){
         APMode = true;

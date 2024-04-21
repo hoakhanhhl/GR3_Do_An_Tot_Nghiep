@@ -18,16 +18,14 @@
 //các chân mặc định có sẵn trên board ở GPIO 22, 19
 #define MPU6050_SDA_PIN 19
 #define MPU6050_SCL_PIN 22
-#define UP_BUTTON_PIN 32
-//bấm =0; nhả =1 hở
+// bấm =0; nhả =1 hở
 #define DOWN_BUTTON_PIN 14 
-//bấm =0; nhả =1 hở
-#define BUZZER_BUTTON_PIN 33 
 // = PIN VP còi reo báo hiệu 
-#define OLED_SDA_PIN 13 
+#define BUZZER_BUTTON_PIN 33 
 //màn led  0.91in white 4 in
+#define OLED_SDA_PIN 13 
 #define OLED_SCL_PIN 15 
-// màn led
+
 
 #if defined(ENABLE_SIOT_WIFI)
     #include "WiFiSelfEnroll.h"  // SIOT Core Lib - seft setup wifi network
@@ -64,7 +62,6 @@ String patientID;
 void setup() {
   Serial.begin(115200);
   Wire.begin(MPU6050_SDA_PIN, MPU6050_SCL_PIN);  // Ánh xạ chân Pin của CPU với các chân I2C của MPU 
-  pinMode(UP_BUTTON_PIN, INPUT_PULLUP); 
   pinMode(DOWN_BUTTON_PIN, INPUT_PULLUP);//nút bấm điện trở kéo lên vì đã nối đất GND ở chân còn lại
   pinMode(BUZZER_BUTTON_PIN, OUTPUT);
   delay(2000); 
@@ -72,15 +69,8 @@ void setup() {
   mpu6050.begin();
   // Tính toán và hiệu chuẩn giá trị offset của con quay quanh các trục (gyroscope)
   mpu6050.calcGyroOffsets(true);
-  
-  {  // Còi báo hiệu kiem tra wifi
-    digitalWrite(BUZZER_BUTTON_PIN, 1);
-    delay(300);
-    digitalWrite(BUZZER_BUTTON_PIN, 0);
-    delay(300);
-  }
 
-  #if defined(ENABLE_SIOT_WIFI) 
+    #if defined(ENABLE_SIOT_WIFI) 
   {
       // Make sure WiFi ssid/password is correct. Otherwise, raise the Adhoc AP Station with ssid = SOICT_CORE_BOARD and password =  12345678
       MyWiFi->setup("KHANHHOA_MEDTECH","12345678");
@@ -89,8 +79,7 @@ void setup() {
       MyWiFi = NULL;
     #endif
   }
-
- {  // Còi bao da xong wifi
+   {  // Còi đã set wifi thành công
     digitalWrite(BUZZER_BUTTON_PIN, 1);
     delay(2000);
     digitalWrite(BUZZER_BUTTON_PIN, 0);
