@@ -1,5 +1,6 @@
 #include <Arduino.h>        //Phải khai báo thêm nếu sử dụng Visual Studio Code + PlatformIO  á
 #include <Wire.h>
+#include <SPI.h>
 #include <MPU6050_tockn.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
@@ -7,6 +8,8 @@
 #include <WebServer.h>  
 #include <iostream>
 #include <chrono>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 //----------------------------------------------------------------
 // CẤU HÌNH 
 //----------------------------------------------------------------
@@ -16,15 +19,22 @@
 /// Sử dụng MQTT
 #define ENABLE_MQTT
 //các chân mặc định có sẵn trên board ở GPIO 22, 19
-#define MPU6050_SDA_PIN 19
-#define MPU6050_SCL_PIN 22
+
 // bấm =0; nhả =1 hở
 #define DOWN_BUTTON_PIN 14 
 // = PIN VP còi reo báo hiệu 
 #define BUZZER_BUTTON_PIN 33 
 //màn led  0.91in white 4 in
-#define OLED_SDA_PIN 13 
-#define OLED_SCL_PIN 15 
+
+//pin của mpu6050 và oled
+#define SDA_PIN 13 
+#define SCL_PIN 15 
+
+#define OLED
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 32
+#define OLED_RESET -1
+#define SCREEN_ADDRESS 0x3C // Địa chỉ I2C của màn hình OLED
 
 
 #if defined(ENABLE_SIOT_WIFI)
@@ -59,16 +69,30 @@ Preferences preferences;
 String deviceID;
 String patientID;
 
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+
 void setup() {
   Serial.begin(115200);
-  Wire.begin(MPU6050_SDA_PIN, MPU6050_SCL_PIN);  // Ánh xạ chân Pin của CPU với các chân I2C của MPU 
+  Wire.begin(SDA_PIN, SCL_PIN);  // Ánh xạ chân Pin của CPU với các chân I2C của MPU và OLED
   pinMode(DOWN_BUTTON_PIN, INPUT_PULLUP);//nút bấm điện trở kéo lên vì đã nối đất GND ở chân còn lại
   pinMode(BUZZER_BUTTON_PIN, OUTPUT);
-  delay(2000); 
+  delay(2000);
+
   // Khởi động cảm biến MPU6050
   mpu6050.begin();
   // Tính toán và hiệu chuẩn giá trị offset của con quay quanh các trục (gyroscope)
   mpu6050.calcGyroOffsets(true);
+
+  // Lấy địa chỉ MAC của ESP32 làm mã định danh
+  deviceID = WiFi.macAddress();
+  // Lấy địa chỉ ID của bệnh nhân
+  patientID = MyWiFi->GetPatientID();
+  // Khởi tạo Preferences
+  preferences.begin("myApp", false);
+  // Lưu trữ mã định danh vào bộ nhớ flash
+  preferences.putString("deviceID", deviceID);
+  preferences.putString("patientID", patientID);
 
     #if defined(ENABLE_SIOT_WIFI) 
   {
@@ -81,7 +105,7 @@ void setup() {
   }
    {  // Còi đã set wifi thành công
     digitalWrite(BUZZER_BUTTON_PIN, 1);
-    delay(2000);
+    delay(1000);
     digitalWrite(BUZZER_BUTTON_PIN, 0);
     delay(300);
   }
@@ -98,15 +122,35 @@ void setup() {
     Serial.println();
   #endif
 
-  // Lấy địa chỉ MAC của ESP32 làm mã định danh
-  deviceID = WiFi.macAddress();
-  // Lấy địa chỉ ID của bệnh nhân
-  patientID = MyWiFi->GetPatientID();
-  // Khởi tạo Preferences
-  preferences.begin("myApp", false);
-  // Lưu trữ mã định danh vào bộ nhớ flash
-  preferences.putString("deviceID", deviceID);
-  preferences.putString("patientID", patientID);
+  #if defined(OLED)
+    if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) { 
+      Serial.println(F("SSD1306 allocation failed"));
+      for(;;); // Don't proceed, loop forever
+    }
+    // Khởi tạo màn hình LED
+    display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
+    
+    // Xóa màn hình
+    display.clearDisplay();
+    
+    // Cài đặt kích thước và kiểu font chữ
+    display.setTextSize(1.5);
+    display.setTextColor(SSD1306_WHITE);
+    
+    // Lấy ID bệnh nhân từ WiFi
+    patientID = MyWiFi->GetPatientID();
+    
+    // Hiển thị ID bệnh nhân lên màn hình
+    display.setCursor(0, 0);
+    display.print("ID: ");
+    display.println(patientID);
+    display.print("Device:");
+    display.println(deviceID);
+    // Cập nhật màn hình
+    display.display();
+          
+  #endif
+
 }
 
 void loop() {
