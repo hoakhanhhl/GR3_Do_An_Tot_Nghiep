@@ -9,7 +9,7 @@
 #include <chrono>
 #include "Heart/Heart.h" //Oxygen, heartrate
 #include "Oled/Oled.h" // Oled
-// #include "MPU6050/MPU6050.h" //MPU6050
+#include "MPU6050/MPU6050.h" //MPU6050
 #include "variables.h"
 //----------------------------------------------------------------
 // CẤU HÌNH 
@@ -19,8 +19,6 @@
 #define ENABLE_SIOT_WIFI
 /// Sử dụng MQTT
 #define ENABLE_MQTT
-// bấm =0; nhả =1 hở
-#define DOWN_BUTTON_PIN 14 
 // = PIN VP còi reo báo hiệu 
 #define BUZZER_BUTTON_PIN 33 
 //pin của MPU6050 và OLED, MAX30102
@@ -28,7 +26,7 @@
 #define SCL_PIN 15 
 
 #define OLED
-// #define MPU6050
+#define MPU6050
 // #define SPO2
 #define HEARTRATE
 
@@ -64,7 +62,6 @@ Preferences preferences;
 void setup() {
   Serial.begin(115200);
   Wire.begin(SDA_PIN, SCL_PIN);  // Ánh xạ chân Pin của CPU với các chân I2C của MPU6050 và OLED, MAX30102
-  pinMode(DOWN_BUTTON_PIN, INPUT_PULLUP);//nút bấm điện trở kéo lên vì đã nối đất GND ở chân còn lại
   pinMode(BUZZER_BUTTON_PIN, OUTPUT); //chuông
   delay(2000);
 
@@ -88,12 +85,12 @@ void setup() {
       MyWiFi = NULL;
     #endif
   }
-  //  {  // Còi đã set wifi thành công
-  //   digitalWrite(BUZZER_BUTTON_PIN, 1);
-  //   delay(1000);
-  //   digitalWrite(BUZZER_BUTTON_PIN, 0);
-  //   delay(300);
-  // }
+   {  // Còi đã set wifi thành công
+    digitalWrite(BUZZER_BUTTON_PIN, 1);
+    delay(1000);
+    digitalWrite(BUZZER_BUTTON_PIN, 0);
+    delay(300);
+  }
 
   #if defined(ENABLE_MQTT)
     // Kết nối MQTT
@@ -132,11 +129,9 @@ void loop() {
     // #endif           
   #pragma endregion MPU6050_READER
 
-  #pragma region SpO2_READER
-    #if defined(HEARTRATE)
-      loop_heart();
-    #endif
-  #pragma endregion SpO2_READER
+  #pragma region HEART_RATE_READER
+    loop_heart();
+  #pragma endregion HEART_RATE_READER
 
   #pragma region Oled_READER
     #if defined(OLED)

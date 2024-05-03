@@ -3,20 +3,11 @@
 #include "MAX30105.h"
 #include "heartRate.h"
 #include "spo2_algorithm.h"
+// bấm =0; nhả =1 hở
+#define DOWN_BUTTON_PIN 14 
 
 MAX30105 particleSensor;
-const byte RATE_SIZE = 4; //Increase this for more averaging. 4 is good.
-byte rates[RATE_SIZE]; //Array of heart rates
-byte rateSpot = 0;
-long lastBeat = 0; //Time at which the last beat occurred
 
-float beatsPerMinute;
-int beatAvg;
-
-uint32_t irBuffer[100]; //infrared LED sensor data
-uint32_t redBuffer[100];  //red LED sensor data
-
-int32_t bufferLength; //data length
 int32_t spo2; //SPO2 value
 int8_t validSPO2; //indicator to show if the SPO2 calculation is valid
 int32_t heartRate; //heart rate value
@@ -26,6 +17,7 @@ void setup_heart()
 {
   Serial.begin(115200);
   Serial.println("Initializing...");
+  pinMode(DOWN_BUTTON_PIN, INPUT_PULLUP);//nút bấm điện trở kéo lên vì đã nối đất GND ở chân còn lại
 
   // Initialize sensor
   if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) //Use default I2C port, 400kHz speed
@@ -33,8 +25,6 @@ void setup_heart()
     Serial.println("MAX30105 was not found. Please check wiring/power. ");
     while (1);
   }
-  Serial.println("Place your index finger on the sensor with steady pressure.");
-
   //Ấn nút 14
   // Serial.println(F("Attach sensor to finger with rubber band. Press any key to start conversion"));
   // while (Serial.available() == 0) ; //wait until user presses a key
@@ -46,56 +36,57 @@ void setup_heart()
 
 }
 
-void loop_heart(){
+bool buttonPressed = false;
+unsigned long buttonPressStartTime = 0;
+unsigned long buttonReleaseTime;
+unsigned long buttonHoldTime = 8000;
+bool buttonWasPressed = false;
 
-  bufferLength = 100; //buffer length of 100 stores 4 seconds of samples running at 25sps
-
-  //read the first 100 samples, and determine the signal range
-  for (byte i = 0 ; i < bufferLength ; i++)
-  {
-    while (particleSensor.available() == false) //do we have new data?
-      particleSensor.check(); //Check the sensor for new data
-
-    redBuffer[i] = particleSensor.getRed();
-    irBuffer[i] = particleSensor.getIR();
-    particleSensor.nextSample(); //We're finished with this sample so move to next sample
-
-    Serial.print(F("red="));
-    Serial.print(redBuffer[i], DEC);
-    Serial.print(F(", ir="));
-    Serial.println(irBuffer[i], DEC);
+void loop_heart() {
+  if (digitalRead(DOWN_BUTTON_PIN) == LOW && !buttonPressed) {
+    // Nút DOWN_BUTTON_PIN được nhấn một lần
+    buttonPressed = true; // Bật nút thành true
+    buttonPressStartTime = millis();
+    Serial.println("Button pressed. Starting program.");
+    Serial.print("buttonPressStartTime: ");
+    Serial.println(buttonPressStartTime);
+  }
+  if (digitalRead(DOWN_BUTTON_PIN) == HIGH && buttonPressed && !buttonWasPressed) {
+    // Nút DOWN_BUTTON_PIN được thả và chưa cập nhật giá trị buttonReleaseTime trước đó
+    buttonReleaseTime = millis();
+    Serial.print("buttonReleaseTime: ");
+    Serial.println(buttonReleaseTime);
+    buttonPressed = false; // Bật nút thành true
+    buttonWasPressed = true; // Đánh dấu rằng giá trị buttonReleaseTime đã được cập nhật
+    buttonHoldTime = buttonReleaseTime - buttonPressStartTime;
+    Serial.print("buttonHoldTime: ");
+    Serial.println(buttonHoldTime);
   }
 
-  //calculate heart rate and SpO2 after first 100 samples (first 4 seconds of samples)
-  maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
+  if (digitalRead(DOWN_BUTTON_PIN) == HIGH && !buttonPressed) {
+    // Nút DOWN_BUTTON_PIN không được nhấn
+    buttonWasPressed = false; // Đặt lại trạng thái của buttonWasPressed
+  }
 
-  //Continuously taking samples from MAX30102.  Heart rate and SpO2 are calculated every 1 second
-  while (1)
-  {
-    //dumping the first 25 sets of samples in the memory and shift the last 75 sets of samples to the top
-    for (byte i = 25; i < 100; i++)
-    {
-      redBuffer[i - 25] = redBuffer[i];
-      irBuffer[i - 25] = irBuffer[i];
-    }
+  if (buttonPressed ||buttonHoldTime < 5000) {
+      // Chương trình đang chạy, thực hiện các hành động mong muốn
+      // Đọc dữ liệu từ cảm biến và tính toán HR và SPO2
+      while (particleSensor.available() == false) { // Có dữ liệu mới?
+        particleSensor.check(); // Kiểm tra cảm biến có dữ liệu mới hay không
+      }
 
-    //take 25 sets of samples before calculating the heart rate.
-    for (byte i = 75; i < 100; i++)
-    {
-      while (particleSensor.available() == false) //do we have new data?
-      particleSensor.check(); //Check the sensor for new data
+      long redBuffer = particleSensor.getRed();
+      long irBuffer = particleSensor.getIR();
+      particleSensor.nextSample(); // Hoàn tất mẫu này, chuyển sang mẫu kế tiếp
 
-      redBuffer[i] = particleSensor.getRed();
-      irBuffer[i] = particleSensor.getIR();
-      particleSensor.nextSample(); //We're finished with this sample so move to next sample
-
-      //send samples and calculation result to terminal program through UART
+      // Gửi các mẫu và tính toán HR và SPO2
       Serial.print(F("red="));
-      Serial.print(redBuffer[i], DEC);
+      Serial.print(redBuffer, DEC);
       Serial.print(F(", ir="));
-      Serial.print(irBuffer[i], DEC);
-      if (irBuffer[i] < 50000)
-      Serial.print(" No finger?");
+      Serial.print(irBuffer, DEC);
+      if (irBuffer < 50000) {
+        Serial.print(" No finger?");
+      }
 
       Serial.print(F(", HR="));
       Serial.print(heartRate, DEC);
@@ -109,12 +100,10 @@ void loop_heart(){
       Serial.print(F(", SPO2Valid="));
       Serial.println(validSPO2, DEC);
       delay(1000);
-    }
-
-    //After gathering 25 new samples recalculate HR and SP02
-    maxim_heart_rate_and_oxygen_saturation(irBuffer, bufferLength, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
   }
-
+  if (buttonHoldTime >= 5000) {
+    // Đã giữ nút quá 2 giây
+    Serial.println("Button held for more than 5 seconds. Stopping program.");
+    delay(1000);
+  }
 }
-
-
