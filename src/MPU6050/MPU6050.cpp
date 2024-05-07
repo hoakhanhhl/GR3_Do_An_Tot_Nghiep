@@ -2,6 +2,7 @@
 #include <Wire.h>
 #include "MPU6050.h"
 #include "../variables.h"
+
 // Đối tượng cảm biến MPU6050
 MPU6050 mpu6050(Wire);
 long timer = 1000;

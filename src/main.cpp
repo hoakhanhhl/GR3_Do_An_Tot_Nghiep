@@ -8,7 +8,7 @@
 #include <iostream>
 #include <chrono>
 #include "Heart/Heart.h" //Oxygen, heartrate
-#include "Oled/Oled.h" // Oled
+// #include "Oled/Oled.h" // Oled
 #include "MPU6050/MPU6050.h" //MPU6050
 #include "variables.h"
 //----------------------------------------------------------------
@@ -25,7 +25,7 @@
 #define SDA_PIN 13 
 #define SCL_PIN 15 
 
-#define OLED
+// #define OLED
 #define MPU6050
 // #define SPO2
 #define HEARTRATE
@@ -135,7 +135,7 @@ void loop() {
 
   #pragma region Oled_READER
     #if defined(OLED)
-      void loop_Oled();
+      patientID = MyWiFi->GetPatientID();
     #endif
   #pragma endregion Oled_READER
   
