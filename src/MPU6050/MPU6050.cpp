@@ -17,7 +17,7 @@ void setup_MPU6050(){
   mpu6050.calcGyroOffsets(true);
 }
 
-void loop_MPU6050(){
+String loop_MPU6050(){
     mpu6050.update();
     if(millis() - timer > 1000){
           // Lấy giá trị gia tốc, góc quay và cảm biến từ trường theo x,y,z
@@ -41,5 +41,6 @@ void loop_MPU6050(){
           timer = millis();
           // Đợi 1 giây trước khi gửi dữ liệu tiếp theo
           delay(1000);
+          return mpu6050_payload;
     }   
 };
