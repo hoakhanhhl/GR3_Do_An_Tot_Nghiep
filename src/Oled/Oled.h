@@ -7,7 +7,7 @@
          * Cau hinh nhịp tim
         */
         void setup_Oled();
-        void update_Oled(long irValue, long hrValue, long spO2);
+        void update_Oled(long irValue, float hrValue, float spO2);
     #elif  defined(ARDUINO_ARCH_ESP8266)
         /// Các khai báo khi sử dụng CPU thuộc họ ESP8266
     #endif

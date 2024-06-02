@@ -27,7 +27,6 @@
 
 #define OLED
 #define MPU6050
-// #define SPO2
 #define HEARTRATE
 
 
@@ -40,7 +39,7 @@
 #if defined(ENABLE_MQTT)
   // Thông tin kết nối MQTT  Mosquitto
   // PROGMEM để hằng kí tự nằm trong bộ nhớ chương trình flash, thay vì bộ nhớ dữ liệu ram
-  const char* mqttServer = "sinno.soict.ai";
+  const char* mqttServer = "dev.techlinkvn.com";
   const int mqttPort = 1883;
   const PROGMEM char* mqttTopic = "dulieu";
   const PROGMEM char* mqttUser = "student";
@@ -56,6 +55,7 @@
 String deviceID;
 String patientID;
 extern String mpu6050_payload;
+extern String heartRate_payload;
 // Đối tượng Preferences
 Preferences preferences;
 // Mã định danh thiết bị
@@ -86,10 +86,10 @@ void setup() {
     #endif
   }
    {  // Còi đã set wifi thành công
-    digitalWrite(BUZZER_BUTTON_PIN, 1);
-    delay(1000);
-    digitalWrite(BUZZER_BUTTON_PIN, 0);
-    delay(300);
+    // digitalWrite(BUZZER_BUTTON_PIN, 1);
+    // delay(1000);
+    // digitalWrite(BUZZER_BUTTON_PIN, 0);
+    // delay(300);
   }
 
   #if defined(ENABLE_MQTT)
@@ -99,7 +99,7 @@ void setup() {
       Serial.print("MQTT connection failed! Error code = ");
     } else {
         Serial.println("Connected to MQTT Broker");
-        delay(2000);
+        delay(1000);
     }
     Serial.println();
   #endif
@@ -123,14 +123,13 @@ void loop() {
   #pragma region MPU6050_READER  
     #if defined(MPU6050)
       loop_MPU6050(); // In dữ liệu ra senior
-    #endif
-    // #if defined(ENABLE_MQTT)
-    //   client.publish(mqttTopic, mpu6050_payload.c_str()); //Gửi dữ liệu lên MQTT
-    // #endif           
+    #endif           
   #pragma endregion MPU6050_READER
-
+   
   #pragma region HEART_RATE_READER
-    loop_heart();
+    #if defined(HEARTRATE)
+      loop_heart(); // In dữ liệu ra senior
+    #endif
   #pragma endregion HEART_RATE_READER
 
   #pragma region Oled_READER
@@ -138,5 +137,11 @@ void loop() {
       patientID = MyWiFi->GetPatientID();
     #endif
   #pragma endregion Oled_READER
+
+  #if defined(ENABLE_MQTT)
+    String data_payload = mpu6050_payload + heartRate_payload;
+    Serial.println(data_payload);
+    client.publish(mqttTopic, data_payload.c_str()); //Gửi dữ liệu mpu6050 lên MQTT
+  #endif
   
 };

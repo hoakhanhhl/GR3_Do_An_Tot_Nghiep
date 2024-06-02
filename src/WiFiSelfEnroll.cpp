@@ -388,7 +388,7 @@ void WiFiSelfEnroll::setup(const char * adhoc_ssid, const char * adhoc_password)
 #endif    
     delay(3000);    
     /// Turn to Adhoc station mode if the Boot button pressed or cannot connect to the AP
-    if (digitalRead(BOOT_BUTTON) == LOW || !IsConfigOK()){
+    if (digitalRead(BOOT_BUTTON) == LOW || !IsConfigOK()){  //Ấn nút button 32 thì đổi sang chế độ AP
         APMode = true;
         SetupStation(adhoc_ssid, adhoc_password);
     } 

@@ -17,7 +17,7 @@ void setup_MPU6050(){
   mpu6050.calcGyroOffsets(true);
 }
 
-String loop_MPU6050(){
+void loop_MPU6050(){
     mpu6050.update();
     if(millis() - timer > 1000){
           // Lấy giá trị gia tốc, góc quay và cảm biến từ trường theo x,y,z
@@ -32,15 +32,31 @@ String loop_MPU6050(){
           float angz = mpu6050.getGyroAngleZ();
 
           // Dữ liệu của MPU6050
-          mpu6050_payload = String(deviceID) + "," + String(patientID) + ","
+          mpu6050_payload = String(deviceID) + "," + String(patientID) + "," 
                         + String(accx) + "," + String(accy) + "," + String(accz) + ","
                         + String(gyrox) + "," + String(gyroy) + "," + String(gyroz) + ","
                         + String(angx) + "," + String(angy) + "," + String(angz);
-          // In dữ liệu
-          Serial.println(mpu6050_payload);
+
+          // In dữ liệu ra senior
+          // Serial.println("=======================================================");
+          // Serial.print("deviceID : ");Serial.print(deviceID);
+          // Serial.print("\tpatientID : ");Serial.println(patientID);
+
+          // Serial.print("accX : ");Serial.print(accx);
+          // Serial.print("\taccY : ");Serial.print(accy);
+          // Serial.print("\taccZ : ");Serial.println(accz);
+        
+          // Serial.print("gyroX : ");Serial.print(gyrox);
+          // Serial.print("\tgyroY : ");Serial.print(gyroy);
+          // Serial.print("\tgyroZ : ");Serial.println(gyroz);
+        
+          // Serial.print("gyroAngleX : ");Serial.print(angx);
+          // Serial.print("\tgyroAngleY : ");Serial.print(angy);
+          // Serial.print("\tgyroAngleZ : ");Serial.println(angz);
+          // Serial.println("=======================================================\n");
+
           timer = millis();
           // Đợi 1 giây trước khi gửi dữ liệu tiếp theo
           delay(1000);
-          return mpu6050_payload;
     }   
 };

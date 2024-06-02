@@ -7,7 +7,7 @@
          * Cau hinh nhịp tim
         */
         void setup_MPU6050();
-        String loop_MPU6050();
+        void loop_MPU6050();
     #elif  defined(ARDUINO_ARCH_ESP8266)
         /// Các khai báo khi sử dụng CPU thuộc họ ESP8266
     #endif

@@ -40,7 +40,7 @@ void setup_Oled() {
     display.display();    
 }
 
-void update_Oled(long irValue, long hrValue, long spO2){
+void update_Oled(long irValue, float spO2, float hrValue){
     display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
     // Xóa màn hình
     display.clearDisplay();
@@ -50,17 +50,19 @@ void update_Oled(long irValue, long hrValue, long spO2){
     display.setTextColor(SSD1306_WHITE);
         // // Hiển thị ID bệnh nhân và ID thiết bị lên màn hình
     display.setCursor(0, 0);
-    display.print("ID: ");
+    display.print("patientID: ");
     display.println(patientID);
-    display.print("Device:");
+    display.print("ID: ");
     display.println(deviceID);
     if (irValue < 50000) {
         display.print(" No finger?");
     }else{
-        display.print("hr/spO2:");
-        display.print(hrValue);
-        display.print("/");
-        display.println(spO2);
+        display.print("Heart Rate: ");
+        display.print(String(hrValue));
+        display.print("bpm\n");
+        display.print("SpO2: ");
+        display.print(String(spO2));
+        display.print("%");
     }
     // Cập nhật màn hình
     display.display();    
