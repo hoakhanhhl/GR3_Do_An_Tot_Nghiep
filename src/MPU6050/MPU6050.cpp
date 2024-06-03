@@ -20,40 +20,45 @@ void setup_MPU6050(){
 void loop_MPU6050(){
     mpu6050.update();
     if(millis() - timer > 1000){
-          // Lấy giá trị gia tốc, góc quay và cảm biến từ trường theo x,y,z
+          // Lấy giá trị gia tốc chuyển động m/s^2, vận tốc góc °/s theo x,y,z và nhiệt độ cảm biến °C
+          float temp = mpu6050.getTemp();
           float accx = mpu6050.getAccX();
           float accy = mpu6050.getAccY();
           float accz = mpu6050.getAccZ();
           float gyrox = mpu6050.getGyroX();
           float gyroy = mpu6050.getGyroY();
           float gyroz = mpu6050.getGyroZ();
-          float angx = mpu6050.getGyroAngleX();
-          float angy = mpu6050.getGyroAngleY();
-          float angz = mpu6050.getGyroAngleZ();
 
           // Dữ liệu của MPU6050
-          mpu6050_payload = String(deviceID) + "," + String(patientID) + "," 
+          mpu6050_payload = String(deviceID) + "," + String(patientID) + "," + String(temp) + ","
                         + String(accx) + "," + String(accy) + "," + String(accz) + ","
-                        + String(gyrox) + "," + String(gyroy) + "," + String(gyroz) + ","
-                        + String(angx) + "," + String(angy) + "," + String(angz);
-
+                        + String(gyrox) + "," + String(gyroy) + "," + String(gyroz);
           // In dữ liệu ra senior
-          // Serial.println("=======================================================");
-          // Serial.print("deviceID : ");Serial.print(deviceID);
-          // Serial.print("\tpatientID : ");Serial.println(patientID);
+          Serial.println("=======================================================");
+          Serial.print("deviceID : ");
+          Serial.print(deviceID);
+          Serial.print("\tpatientID : ");
+          Serial.println(patientID);
+          Serial.print("Temperature: ");
+          Serial.print(temp);
+          Serial.println(" degC");
 
-          // Serial.print("accX : ");Serial.print(accx);
-          // Serial.print("\taccY : ");Serial.print(accy);
-          // Serial.print("\taccZ : ");Serial.println(accz);
-        
-          // Serial.print("gyroX : ");Serial.print(gyrox);
-          // Serial.print("\tgyroY : ");Serial.print(gyroy);
-          // Serial.print("\tgyroZ : ");Serial.println(gyroz);
-        
-          // Serial.print("gyroAngleX : ");Serial.print(angx);
-          // Serial.print("\tgyroAngleY : ");Serial.print(angy);
-          // Serial.print("\tgyroAngleZ : ");Serial.println(angz);
-          // Serial.println("=======================================================\n");
+          Serial.print("Acceleration X: ");
+          Serial.print(accx);
+          Serial.print(", Y: ");
+          Serial.print(accy);
+          Serial.print(", Z: ");
+          Serial.print(accz);
+          Serial.println(" m/s^2");
+
+          Serial.print("Rotation X: ");
+          Serial.print(gyrox);
+          Serial.print(", Y: ");
+          Serial.print(gyroy);
+          Serial.print(", Z: ");
+          Serial.print(gyroz);
+          Serial.println(" deg/s");
+          Serial.println("=======================================================\n");
 
           timer = millis();
           // Đợi 1 giây trước khi gửi dữ liệu tiếp theo

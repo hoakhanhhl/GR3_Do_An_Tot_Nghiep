@@ -76,37 +76,35 @@ void loop_heart()
       // Read IR (infrared) and Red LED values 
       int32_t irValue = particleSensor.getIR();
       int32_t redValue = particleSensor.getRed();
-      float spo2;
+      float spO2;
       float heartRate;
       float ratio = (float)redValue / (float)irValue;
+      spO2 = 100 - (17 * ratio/100);
+      heartRate = irValue / 2000.0;
+      
       if (redValue <50000){
-        spo2 = 0.00;
-        heartRate = 0;
         Serial.print("No finger?\n");
-      }else{
-        spo2 = 100 - (17 * ratio/100);
-        heartRate = irValue / 2000.0;
       }
       // Print the values to the Serial Monitor
-      // Serial.print("IR Value: ");
-      // Serial.print(irValue);
-      // Serial.print("\t");
+      Serial.print("IR Value: ");
+      Serial.print(irValue);
+      Serial.print("\t");
 
-      // Serial.print("Red Value: ");
-      // Serial.print(redValue);
-      // Serial.print("\t");
+      Serial.print("Red Value: ");
+      Serial.print(redValue);
+      Serial.print("\t");
 
-      // Serial.print("SpO2: ");
-      // Serial.print(spo2);
-      // Serial.print("%\t");
+      Serial.print("SpO2: ");
+      Serial.print(spO2);
+      Serial.print("%\t");
 
-      // Serial.print("Heart Rate: ");
-      // Serial.print(heartRate);
-      // Serial.print("bpm\n");
-      // Serial.println("=======================================================\n");
+      Serial.print("Heart Rate: ");
+      Serial.print(heartRate);
+      Serial.print("bpm\n");
+      Serial.println("=======================================================\n");
 
-      heartRate_payload = "," + String(irValue) + "," + String(redValue) + "," + String(spo2) + "," + String(heartRate);
-      update_Oled(irValue, spo2, heartRate);
+      heartRate_payload = "," + String(irValue) + "," + String(redValue) + "," + String(spO2) + "," + String(heartRate);
+      update_Oled(irValue, spO2, heartRate);
       previousMillis = currentMillis;
       delay(1000);                     
     }

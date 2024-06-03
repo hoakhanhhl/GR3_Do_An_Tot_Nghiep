@@ -86,10 +86,10 @@ void setup() {
     #endif
   }
    {  // Còi đã set wifi thành công
-    // digitalWrite(BUZZER_BUTTON_PIN, 1);
-    // delay(1000);
-    // digitalWrite(BUZZER_BUTTON_PIN, 0);
-    // delay(300);
+    digitalWrite(BUZZER_BUTTON_PIN, 1);
+    delay(1000);
+    digitalWrite(BUZZER_BUTTON_PIN, 0);
+    delay(300);
   }
 
   #if defined(ENABLE_MQTT)
@@ -140,7 +140,7 @@ void loop() {
 
   #if defined(ENABLE_MQTT)
     String data_payload = mpu6050_payload + heartRate_payload;
-    Serial.println(data_payload);
+    // Serial.println(data_payload);
     client.publish(mqttTopic, data_payload.c_str()); //Gửi dữ liệu mpu6050 lên MQTT
   #endif
   
