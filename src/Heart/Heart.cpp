@@ -79,11 +79,14 @@ void loop_heart()
       float spO2;
       float heartRate;
       float ratio = (float)redValue / (float)irValue;
-      spO2 = 100 - (17 * ratio/100);
-      heartRate = irValue / 2000.0;
       
       if (redValue <50000){
         Serial.print("No finger?\n");
+        spO2 = 0;
+        heartRate = 0;
+      }else{
+        spO2 = 100 - (17 * ratio/100);
+        heartRate = irValue / 2000.0;
       }
       // Print the values to the Serial Monitor
       Serial.print("IR Value: ");
