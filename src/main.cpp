@@ -78,7 +78,8 @@ void setup() {
 
     #if defined(ENABLE_SIOT_WIFI) 
   {
-      // Make sure WiFi ssid/password is correct. Otherwise, raise the Adhoc AP Station with ssid = SOICT_CORE_BOARD and password =  12345678
+      // Make sure WiFi ssid/password is correct. Otherwise, raise the Adhoc AP Station with
+      // ssid = KHANHHOA_MEDTECH and password =  12345678
       MyWiFi->setup("KHANHHOA_MEDTECH","12345678");
       // Release the memory allocated for WiFi Station Handler after finishing his work
       delete MyWiFi;
@@ -86,10 +87,10 @@ void setup() {
     #endif
   }
    {  // Còi đã set wifi thành công
-    // digitalWrite(BUZZER_BUTTON_PIN, 1);
-    // delay(1000);
-    // digitalWrite(BUZZER_BUTTON_PIN, 0);
-    // delay(300);
+    digitalWrite(BUZZER_BUTTON_PIN, 1);
+    delay(1000);
+    digitalWrite(BUZZER_BUTTON_PIN, 0);
+    delay(300);
   }
 
   #if defined(ENABLE_MQTT)

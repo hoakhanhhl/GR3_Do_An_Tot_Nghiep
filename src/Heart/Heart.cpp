@@ -42,20 +42,17 @@ String heartRate_payload;
 void loop_heart()
 {
   if (digitalRead(DOWN_BUTTON_PIN) == LOW && !buttonPressed)
-  {
-    // Nút DOWN_BUTTON_PIN được nhấn một lần
+  {// Nút DOWN_BUTTON_PIN được nhấn một lần
     buttonPressed = true; // Bật nút thành true
     buttonPressStartTime = millis();
     Serial.println("Button pressed.");
   }
   if (digitalRead(DOWN_BUTTON_PIN) == HIGH && !buttonPressed)
-  {
-    // Nút DOWN_BUTTON_PIN không được nhấn
+  {// Nút DOWN_BUTTON_PIN không được nhấn
     buttonWasPressed = false; // Đặt lại trạng thái của buttonWasPressed
   }
   if (digitalRead(DOWN_BUTTON_PIN) == HIGH && buttonPressed && !buttonWasPressed)
-  {
-    // Nút DOWN_BUTTON_PIN được thả và chưa cập nhật giá trị buttonReleaseTime trước đó
+  {// Nút DOWN_BUTTON_PIN được thả và chưa cập nhật giá trị buttonReleaseTime trước đó
     buttonReleaseTime = millis();
     buttonPressed = false;   // Bật nút thành true
     buttonWasPressed = true; // Đánh dấu rằng giá trị buttonReleaseTime đã được cập nhật
@@ -63,12 +60,10 @@ void loop_heart()
     printf("\n button pressed and end %ld\n", buttonHoldTime);
   }
   if (buttonHoldTime >= 5000 && buttonWasPressed)
-  {
-    // Đã giữ nút quá 2 giây
+  {// Đã giữ nút quá 2 giây
     Serial.println("Button held for more than 5 seconds. Stopping program.");
     heartRate_payload = "";
   }
-
   if (buttonPressed || buttonHoldTime < 5000)
   { 
     unsigned long currentMillis = millis();
